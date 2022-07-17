@@ -80,6 +80,19 @@
                             <v-icon class="text-white"> mdi-printer </v-icon>
                         </v-btn>
                     </v-col>
+                    <v-col cols="12" md="6" sm="12">
+                        <v-select
+                            :items="uploadReportPeriod"
+                            v-model="uploadReportPeriodSelected"
+                            @change="onChangeUploadReportsSelected"
+                            outlined
+                            dense
+                            class="mb-2"
+                        />
+                        <v-btn value="left" color="info" small @click="printRequestReport">
+                            <v-icon class="text-white"> mdi-printer </v-icon>
+                        </v-btn>
+                    </v-col>
                 </v-row>
                 <!-- <h5>APPROVED UPLOAD DOCUMENTS: {{ totalUploadDocuments }}</h5> -->
 
@@ -130,6 +143,8 @@ export default {
       isMonth:true,
       reports:'request_reports',
       uploadReportsSelection: ['Uploads', 'Archived', 'Disposed'],
+      uploadReportPeriod: ['Week', 'Month', 'Year'],
+      uploadReportPeriodSelected: 'Week',
       uploadReportsSelected: 'Uploads',
       uploadsData: []
     };
@@ -208,7 +223,8 @@ export default {
   methods: {
     async onChangeUploadReportsSelected(){
         let formData = {
-            type: this.uploadReportsSelected
+            type: this.uploadReportsSelected,
+            period: this.uploadReportPeriodSelected
         }
         const response = await axios.post('/api/upload-reports', formData)
         const result = response.data

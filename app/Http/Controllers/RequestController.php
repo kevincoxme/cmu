@@ -254,6 +254,7 @@ class RequestController extends Controller
     public function uploadReports(Request $request)
     {
         $type = $request->type;
+        $period = $request->period;
 
         $uploads = File::with('location')
         ->select(DB::raw(
@@ -265,13 +266,31 @@ class RequestController extends Controller
             file_category.category
             '
         ))
-        ->where(function($query) use($type){
+        ->where(function($query) use($type, $period){
             switch ($type) {
                 case 'Archived':
                     $query->where('archive', 'Archive');
                 break;
                 case 'Disposed':
                     $query->where('retention_status', 'Dispose');
+                break;
+            }
+
+            switch ($period) {
+                case 'Week':
+                    $query->whereBetween(DB::raw('DATE_FORMAT(files.created_at, "%Y-%m-%d")'), [
+                        Carbon::now()->startOfWeek()->format('Y-m-d'),
+                        Carbon::now()->endOfWeek()->format('Y-m-d')
+                    ]);
+                break;
+                case 'Month':
+                    $query->whereBetween(DB::raw('DATE_FORMAT(files.created_at, "%Y-%m")'), [
+                        Carbon::now()->startOfMonth()->format('Y-m'),
+                        Carbon::now()->endOfMonth()->format('Y-m')
+                    ]);
+                break;
+                case 'Year':
+                    $query->whereYear('files.created_at', date('Y'));
                 break;
             }
         })
