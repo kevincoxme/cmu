@@ -38,8 +38,8 @@
         </template>
         <template v-slot:top>
           <h4>List of Documents</h4>
-          <v-switch v-model="singleSelect" class="pa-3" label="Single Select">
-          </v-switch>
+          <!-- <v-switch v-model="singleSelect" class="pa-3" label="Single Select">
+          </v-switch> -->
 
           <v-toolbar flat>
             <div v-show="auth.user_type === 'Staff'">
@@ -104,9 +104,9 @@
                     <v-form ref="form" @submit.prevent="save">
                       <v-text-field
                         v-show="formTitle === 'Update File'"
-                        v-model="form.file_id"
+                        v-model="form.filename"
                         prepend-inner-icon="mdi-information-outline"
-                        label="File ID"
+                        label="File name"
                         disabled
                         dense
                         outlined

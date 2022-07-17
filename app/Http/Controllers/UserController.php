@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Http\Resources\UserResource;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rules\Password;
 
 class UserController extends Controller
 {
@@ -44,7 +45,17 @@ class UserController extends Controller
         return $request->validate([
             'name'          => 'required|string',
             'email'         => 'required|string|email|unique:users,email',
-            'password'      => 'required|string|confirmed',
+            'password'      => [
+                'required',
+                'string',
+                'confirmed',
+                Password::min(8)
+                ->letters()
+                ->mixedCase()
+                ->numbers()
+                ->symbols()
+                ->uncompromised()
+            ],
             'user_type'     => 'required|string|alpha',
             'phone_no'      => 'required|string',
             'address'       => 'required|string'
@@ -117,7 +128,7 @@ class UserController extends Controller
 
             $user->save();
         }
-        
+
         return new UserResource($user);
     }
     public function updateCurrentUserPassword(Request $request, $id)
@@ -130,7 +141,7 @@ class UserController extends Controller
         ]);
 
         $hashPass = Auth::user()->password;
-        
+
         $user = User::findOrFail($id);
 
         $currentpass = $request->password;
@@ -138,7 +149,7 @@ class UserController extends Controller
         $newpass =  bcrypt($request->newpass);
 
         if(!$user || !Hash::check($currentpass,$hashPass)){
-            
+
             return response([
                 'message'   => 'The password is incorrect'
             ], 401);
@@ -147,7 +158,7 @@ class UserController extends Controller
             $user->password = $newpass;
             $user->save();
         }
-        
+
         return new UserResource($user);
     }
     public function destroy($id)

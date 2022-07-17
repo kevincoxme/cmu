@@ -63,8 +63,8 @@
 
         <template v-slot:top>
           <h4>List of Documents</h4>
-          <v-switch v-model="singleSelect" label="Single Select" class="pa-3">
-          </v-switch>
+          <!-- <v-switch v-model="singleSelect" label="Single Select" class="pa-3">
+          </v-switch> -->
           <v-toolbar flat>
             <!-- FILES MANAGEMENT MODALS -->
 
@@ -133,7 +133,6 @@
                           "
                           v-model="form.filename"
                           :rules="rules.filename"
-                          @input="generateSlug"
                           prepend-inner-icon="mdi-file"
                           dense
                           outlined
@@ -257,7 +256,7 @@
                         </v-container>
 
 
-                        <div class="input-group mb-3">
+                        <!-- <div class="input-group mb-3">
                           <div class="input-group-prepend">
                             <span class="input-group-text"
                               ><v-icon>mdi-file-cabinet</v-icon></span
@@ -282,7 +281,7 @@
                               >{{ filename }}</label
                             >
                           </div>
-                        </div>
+                        </div> -->
 
                       </v-form>
                     </div>
@@ -510,12 +509,12 @@ export default {
     fetchFiles() {
       if (this.category_id === 0) {
         const files = this.$store.getters.getAllDocs;
-        return this._.orderBy(files, ["created_at"], ["desc"]);
+        return this._.orderBy(files, ["created_at"], ["asc"]);
       } else {
         const files = this.$store.getters.filterFilesByCategory(
           this.category_id
         );
-        return this._.orderBy(files, ["created_at"], ["desc"]);
+          return this._.orderBy(files, ["created_at"], ["asc"]);
       }
     },
 
@@ -566,10 +565,16 @@ export default {
     },
   },
 
+  watch: {
+    'form.filename'(newValue) {
+        this.form.slug = newValue.replaceAll(' ', '-')
+    }
+  },
+
   methods: {
     generateSlug(event) {
       if(event) {
-        this.form.slug = event
+        //this.form.slug = event.replace(' ', '-')
       }
     },
     getCategory(category) {

@@ -27,7 +27,7 @@ const getters = {
     getApprovedPendingRequest: (state) => (user_id) => {
         const req = state.requests.filter(item => item.user_id === user_id)
         /* return state.requests.filter(item => item.status === 'Approved' || item.status ==='Pending' && item.user_id === user_id) */
-        return req.filter(item => item.status === 'Approved' || item.status === 'Pending')
+        return req;
 
     },
 
@@ -128,7 +128,7 @@ const mutations = {
     SET_FILE_REQUEST_REPORTS:(state,data) => {
         state.file_request_reports = data
     }
-    
+
 
 
 }
@@ -191,7 +191,7 @@ const actions = {
             console.log(rootState.files.file_location)
             await axios.get('/api/filelocations/' + payload.file_location_id).then((response) => {
                 commit('SET_REQUEST_DOCUMENT', response.data)
-                
+
             }).catch((err) => {
                 console.log(err.response.data)
             });
@@ -233,7 +233,7 @@ const actions = {
     /* async deleteMultipleRequestLog({commit,rootState},data) {
         rootState.base.isLoading = true
         try {
-            
+
         } catch (error) {
             console.error();
         }
@@ -341,7 +341,7 @@ const actions = {
         try {
             await axios.get('/api/requestreportsdaily').then((response) => {
 
-                
+
                 commit('SET_REQUEST_REPORT', response.data)
 
             }).catch((err) => {
@@ -349,7 +349,7 @@ const actions = {
                 console.log(err.response.data)
 
             });
-            
+
         }
 
         catch (error) {
@@ -377,7 +377,7 @@ const actions = {
             await axios.get('/api/requestreportsweekly').then((response) => {
 
                 let request_reports = response.data
-                
+
                 let data = []
 
                 for (let i = 0; i < Object.values(request_reports).length; i++) {
@@ -407,30 +407,31 @@ const actions = {
     async getRequestReportsMonthly({ commit }) {
         try {
             await axios.get('/api/requestreportsmonthly').then((response) => {
-                
+
                 let request_reports = response.data
+                console.log(request_reports)
 
-                let data = []
+                // let data = []
 
-                for(let i = 0;i<Object.values(request_reports).length;i++) {
+                // for(let i = 0;i<Object.values(request_reports).length;i++) {
 
-                    let date = Object.keys(request_reports)[i]
+                //     let date = Object.keys(request_reports)[i]
 
-                    let total = Object.values(request_reports)[i].filter(item => item.status === 'Approved' || item.status === 'Pending').length
-                    let approved = Object.values(request_reports)[i].filter(item => item.status === 'Approved').length
-                    let pending = Object.values(request_reports)[i].filter(item => item.status === 'Pending').length
-                    let denied = Object.values(request_reports)[i].filter(item => item.status === 'Denied').length
-                    let expired = Object.values(request_reports)[i].filter(item => item.status === 'Expired').length
+                //     let total = Object.values(request_reports)[i].filter(item => item.status === 'Approved' || item.status === 'Pending').length
+                //     let approved = Object.values(request_reports)[i].filter(item => item.status === 'Approved').length
+                //     let pending = Object.values(request_reports)[i].filter(item => item.status === 'Pending').length
+                //     let denied = Object.values(request_reports)[i].filter(item => item.status === 'Denied').length
+                //     let expired = Object.values(request_reports)[i].filter(item => item.status === 'Expired').length
 
-                    data.push({total,date,approved,pending,denied,expired})
-                }
+                //     data.push({total,date,approved,pending,denied,expired})
+                // }
 
-                commit('SET_REQUEST_REPORT_MONTHLY', data)
-                
+                commit('SET_REQUEST_REPORT_MONTHLY', response.data)
+
             }).catch((err) => {
 
                 console.log(err.response.data)
-                
+
             });
         }
         catch (error) {
@@ -441,24 +442,24 @@ const actions = {
     async getRequestReportsYearly({ commit }) {
         try {
             await axios.get('/api/requestreportsyearly').then((response) => {
-                
+
                 let request_reports = response.data
                 let data = []
 
                 for(let i = 0;i<Object.values(request_reports).length;i++) {
                     let date = Object.keys(request_reports)[i]
 
-                    
+
 
                     data.push({date})
                 }
 
                 commit('SET_REQUEST_REPORT_YEARLY', data)
-                
+
             }).catch((err) => {
 
                 console.log(err.response.data)
-                
+
             });
         }
         catch (error) {

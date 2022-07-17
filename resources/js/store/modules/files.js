@@ -68,28 +68,16 @@ const getters = {
         return state.files.filter(item => item.file_status === 'Approved')
     },
     totalArchiveDocuments(state) {
-        let total = 0
-        let archive = state.files.filter(item => item.archive === 'Unarchive')
-        for (const obj of archive) {
-            total++
-        }
-        return total
+        let archive = state.files.filter(item => item.archive === 'Archive')
+        return archive.length
     },
     totalUnarchivedDocuments(state) {
-        let total = 0
         let unarchive = state.files.filter(item => item.archive === 'Unarchive')
-        for (const obj of unarchive) {
-            total++
-        }
-        return total
+        return unarchive.length
     },
     totalDisposedDocuments(state) {
-        let total = 0
         let dispose = state.files.filter(item => item.retention_status === 'Dispose')
-        for (const obj of dispose) {
-            total++
-        }
-        return total
+        return dispose.length
     },
 
 }

@@ -1,48 +1,49 @@
 <template>
-  <div>
-    <!-- Alert Message -->
-    <v-overlay :value="isLoading">
-      <v-progress-circular indeterminate size="64"></v-progress-circular>
-    </v-overlay>
+    <div>
+        <!-- Alert Message -->
+        <v-overlay :value="isLoading">
+            <v-progress-circular indeterminate size="64"></v-progress-circular>
+        </v-overlay>
 
-    <div v-if="getFileType === 'pdf'">
-      <v-container>
-        <v-btn id="prev" color="success">
-          <v-icon>mdi-skip-previous</v-icon>
-        </v-btn>
-        <v-btn id="next" color="success"><v-icon>mdi-skip-next</v-icon></v-btn>
-        &nbsp; &nbsp;
-        <span
-          >Page: <span id="page_num"></span> / <span id="page_count"></span
-        ></span>
-      </v-container>
+        <div class="wrapper" v-if="getFileType === 'pdf'" style="height: 1000px; width: 100%;">
+            <v-container>
+                <v-btn id="prev" color="success">
+                    <v-icon>mdi-skip-previous</v-icon>
+                </v-btn>
+                <v-btn id="next" color="success">
+                    <v-icon>mdi-skip-next</v-icon>
+                </v-btn>
+                &nbsp; &nbsp;
+                <span>Page: <span id="page_num"></span> / <span id="page_count"></span></span>
+            </v-container>
 
-      <canvas id="the-canvas"></canvas>
-      <div class="textLayer"></div>
+            <canvas id="the-canvas" class="img-fluid"></canvas>
+            <div class="textLayer"></div>
+
+            <!-- <object :data="getFile.filecontent" type="application/pdf">
+                <iframe
+                    :src="`https://docs.google.com/viewer?url=${getFile.filecontent}&embedded=true#toolbar=0`"></iframe>
+            </object> -->
+            <!-- <embed :src="getFile.filecontent + '#toolbar=0'" type="">
+            <div class="embed-cover"></div> -->
+        </div>
+        <div v-else>
+            <!-- <v-container>
+                <v-btn v-show="request.document_type === 'Public'" id="next" color="error" @click="downloadDocuments">
+                    <v-icon>mdi-download</v-icon>
+                </v-btn>
+            </v-container> -->
+            <img class="img-fluid" :src="getFile.filecontent" />
+        </div>
     </div>
-    <div v-else>
-      <v-container>
-        <v-btn
-          v-show="request.document_type === 'Public'"
-          id="next"
-          color="error"
-          @click="downloadDocuments"
-        >
-          <v-icon>mdi-download</v-icon>
-        </v-btn>
-      </v-container>
-      <img :src="getFile.filecontent" />
-
-      </canvas>
-    </div>
-  </div>
 </template>
 <script>
 import AlertComponent from "./../../../AlertComponent.vue";
+
 export default {
   props: ["docs", "request"],
   components: {
-    AlertComponent,
+    AlertComponent
   },
   data() {
     return {
@@ -80,7 +81,7 @@ export default {
     },
     setPdvViewer() {
       if (this.getFileType === "pdf") {
-       
+
         var url = this.getFile.filecontent;
 
         // Loaded via <script> tag, create shortcut to access PDF.js exports.
@@ -98,6 +99,7 @@ export default {
           scale = 2,
           canvas = document.getElementById("the-canvas"),
           textLayer = document.querySelector(".textLayer"),
+          container = document.querySelector(".wrapper"),
           ctx = canvas.getContext("2d");
 
         /**
@@ -109,6 +111,8 @@ export default {
           // Using promise to fetch the page
           pdfDoc.getPage(num).then(function (page) {
             var viewport = page.getViewport({ scale: scale });
+            //scale = container.clientWidth / viewport.width
+            //viewport = page.getViewport(scale);
             canvas.height = viewport.height;
             canvas.width = viewport.width;
 
@@ -158,7 +162,8 @@ export default {
                   textContent: textContent,
                   container: textLayer,
                   viewport: viewport,
-                  textDivs: [],
+                    textDivs: [],
+                    transform: [resolution, 0, 0, resolution, 0, 0] // force it bigger siz
                 });
               });
           });
@@ -214,7 +219,7 @@ export default {
           renderPage(pageNum);
         });
       }
-       
+
     },
   },
   mounted() {
@@ -228,5 +233,26 @@ export default {
 <style scoped>
 #the-canvas {
   direction: ltr;
+}
+embed {
+    width: 100%;
+    height: 90vh;
+}
+.embed-cover {
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    margin-right: 20px;
+
+    /* Just for demonstration, remove this part */
+    opacity: 0.25;
+    background-color: transparent;
+}
+
+.wrapper {
+    position: relative;
+    overflow: hidden;
 }
 </style>

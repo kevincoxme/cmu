@@ -6,8 +6,10 @@ use Illuminate\Http\Request;
 use App\Models\Request as Req;
 use App\Http\Resources\RequestResource;
 use App\Http\Resources\FileRequestReportsResource;
+use App\Models\File;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
 class RequestController extends Controller
@@ -116,7 +118,7 @@ class RequestController extends Controller
         $req->status = $request->status;
 
         $req->expiration_date = $request->expiration_date;
-        
+
         $req->save();
 
         return new RequestResource($req);
@@ -126,16 +128,25 @@ class RequestController extends Controller
     {
         $dailyreports = Req::select(DB::raw(
             '
-            DATE(request_date) as date,
+            DATE(requests.request_date) as date,
+            COUNT(requests.request_id) as no_of_requests,
+            file_category.category as category,
+            files.filename as filename,
+            requests.purpose as purpose,
+            file_locations.file_location as file_location,
+            files.user_id as user_id,
+            DATE_FORMAT(requests.request_date, "%m/%d/%Y") as request_date,
             COUNT(CASE WHEN status = "Approved" OR status = "Pending"  THEN 1 ELSE NULL END) as "total",
             COUNT(CASE WHEN status = "Approved" THEN 1 ELSE NULL END) as "approved",
             COUNT(CASE WHEN status = "Pending" THEN 1 ELSE NULL END) as "pending",
             COUNT(CASE WHEN status = "Denied" THEN 1 ELSE NULL END) as "denied",
             COUNT(CASE WHEN status = "Expired" THEN 1 ELSE NULL END) as "expired"
             '
-        ))->groupBy(DB::raw(
-            'DATE(request_date)'
-        ))->get();
+        ))
+        ->leftJoin('files', 'files.file_id', '=', 'requests.file_id')
+        ->leftJoin('file_category', 'files.category_id', '=', 'file_category.category_id')
+        ->leftJoin('file_locations', 'file_locations.file_id', '=', 'files.file_id')
+        ->groupBy('request_id')->get();
 
 
         return response($dailyreports);
@@ -147,7 +158,7 @@ class RequestController extends Controller
             'COUNT(requests.file_id) as totalrequests,
             files.filename as "filename",
             file_category.category as "category"'
-            
+
         ))
         ->join('files','requests.file_id', '=','files.file_id')
         ->join('file_category','files.category_id','=','file_category.category_id')
@@ -173,12 +184,38 @@ class RequestController extends Controller
     }
     public function requestReportsMonthly()
     {
-        $monthlyreports = Req::all()->groupBy(function ($date) {
-            $request_date = Carbon::parse($date->request_date);
-            $month = $request_date->format('F Y');
-            return "{$month}";
-        });
+        // $monthlyreports = Req::all()->groupBy(function ($date) {
+        //     $request_date = Carbon::parse($date->request_date);
+        //     $month = $request_date->format('F Y');
+        //     return "{$month}";
+        // });
 
+        $monthlyreports = Req::select(DB::raw(
+            '
+            DATE(requests.request_date) as date,
+            COUNT(requests.request_id) as no_of_requests,
+            file_category.category as category,
+            files.filename as filename,
+            requests.purpose as purpose,
+            file_locations.file_location as file_location,
+            files.user_id as user_id,
+            DATE_FORMAT(requests.request_date, "%m/%d/%Y") as request_date,
+            DATE_FORMAT(requests.request_date, "%m/%Y") as request_date_monthly,
+            COUNT(CASE WHEN status = "Approved" OR status = "Pending"  THEN 1 ELSE NULL END) as "total",
+            COUNT(CASE WHEN status = "Approved" THEN 1 ELSE NULL END) as "approved",
+            COUNT(CASE WHEN status = "Pending" THEN 1 ELSE NULL END) as "pending",
+            COUNT(CASE WHEN status = "Denied" THEN 1 ELSE NULL END) as "denied",
+            COUNT(CASE WHEN status = "Expired" THEN 1 ELSE NULL END) as "expired"
+            '
+        ))
+        ->leftJoin('files', 'files.file_id', '=', 'requests.file_id')
+        ->leftJoin('file_category', 'files.category_id', '=', 'file_category.category_id')
+        ->leftJoin('file_locations', 'file_locations.file_id', '=', 'files.file_id')
+        ->groupBy(DB::raw(
+            'DATE_FORMAT(requests.request_date, "%m/%Y")'
+        ))->get();
+
+        Log::info($monthlyreports);
 
         return response($monthlyreports);
     }
@@ -212,5 +249,36 @@ class RequestController extends Controller
 
         /* return response($req); */
         return response($req);
+    }
+
+    public function uploadReports(Request $request)
+    {
+        $type = $request->type;
+
+        $uploads = File::with('location')
+        ->select(DB::raw(
+            'files.file_id,
+            DATE_FORMAT(files.created_at, "%m/%d/%Y") as date_uploaded,
+            DATE_FORMAT(files.retention_date, "%m/%d/%Y") as retention_date,
+            files.code,
+            files.filename,
+            file_category.category
+            '
+        ))
+        ->where(function($query) use($type){
+            switch ($type) {
+                case 'Archived':
+                    $query->where('archive', 'Archive');
+                break;
+                case 'Disposed':
+                    $query->where('retention_status', 'Dispose');
+                break;
+            }
+        })
+        ->has('location')
+        ->leftJoin('file_category', 'file_category.category_id', '=', 'files.category_id')
+        ->get();
+
+        return response()->json($uploads);
     }
 }

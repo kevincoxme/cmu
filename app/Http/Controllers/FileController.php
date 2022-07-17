@@ -6,24 +6,30 @@ use App\Models\File;
 use Illuminate\Http\Request;
 use App\Http\Resources\FileResource;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class FileController extends Controller
 {
 
     private $pagination_no = 10;
-    
+
     public function index()
     {
         /* $files = File::join('users', 'files.user_id', '=', 'users.user_id')->join('file_category', 'files.category_id', '=', 'file_category.category_id')
         ->select('users.name as name','files.*')
         ->get(); */
-        $files = File::leftJoin('file_category', 'files.category_id', '=', 'file_category.category_id')->get();
-
+        $files = File::select(
+            'files.*',
+            'file_category.category'
+        )
+        ->leftJoin('file_category', 'files.category_id', '=', 'file_category.category_id')
+        ->orderBy('files.file_id', 'asc')
+        ->get();
         return FileResource::collection($files);
     }
 
     public function show($id)
-    { 
+    {
         return new FileResource(File::findOrFail($id));
     }
 
@@ -62,7 +68,7 @@ class FileController extends Controller
 
         return new FileResource($file);
     }
-    
+
     public function getFileDisposal()
     {
         $filedis = File::select(DB::raw('*'))
@@ -78,12 +84,12 @@ class FileController extends Controller
         $this->validation($request);
 
         $file = File::findOrFail($id);
- 
+
         $file->update($request->all());
 
         return new FileResource($file);
     }
-    
+
     public function destroy($id)
     {
         $file = File::findOrFail($id);
@@ -95,7 +101,7 @@ class FileController extends Controller
     {
         $ids = $request;
         $file = File::whereIn('file_id',$ids)->delete();
-        
+
         return response($file);
 
     }

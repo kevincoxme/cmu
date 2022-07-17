@@ -79,6 +79,7 @@
                           prepend-inner-icon="mdi-phone"
                           :rules="rules.phone_no"
                           type="number"
+                          @keydown="limitText($event, 12)"
                           required
                         ></v-text-field>
                       </v-col>
@@ -185,11 +186,14 @@ export default {
           (v) => /.+@.+\..+/.test(v) || "E-mail must be valid",
         ],
         address: [(v) => !!v || "Address is required"],
-        phone_no: [(v) => !!v || "Phone No. is required"],
+        phone_no: [
+            (v) => !!v || "Phone No. is required",
+            (v) => (v && v.length > 12) || "Phone No. limit is 12",
+        ],
         user_type: [(v) => !!v || "User type is required"],
         password: [
           (v) => !!v || "Password is required",
-          (v) => (v && v.length >= 5) || "Passowrd must atleast 10 characters",
+          (v) => (v && v.length >= 8) || "Passowrd must atleast 8 characters",
           //(v) => (v && /\d/.test(v)) || "Password must have atleast one number",
           //(v) => (v && /[A-Z]{1}/.test(v) || "Password must have atleast one capital letter"),
           //(v) => (v && /[^A-Za-z0-9]/.test(v) || "Password must have atleast one special character")
@@ -214,6 +218,12 @@ export default {
     },
   },
   methods: {
+    limitText(limitField, limitNum) {
+        if (limitField.target.value.toString().length < limitNum) {
+            limitField = limitField.target.value.substring(0, limitNum);
+        }
+        this.form.phone_no = limitField;
+    },
     redirectToHome() {
       this.$router.push({ name: "homepage" });
     },

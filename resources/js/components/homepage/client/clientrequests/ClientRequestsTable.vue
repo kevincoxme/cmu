@@ -139,10 +139,10 @@
             color="error"
             small
             @click="deleteItem(item)"
-            v-show="item.status === 'Pending'"
+            v-show="item.status === 'Pending' || item.status === 'Denied'"
           >
             mdi-delete
-          </v-icon> 
+          </v-icon>
           <v-btn-toggle v-model="icon" borderless>
             <v-btn x-small value="left" color="success" @click="showRequestedDocument(item)"
             v-show="item.status === 'Approved'">
@@ -282,6 +282,7 @@ export default {
   methods: {
     getColor(status) {
       if (status === "Approved") return "green";
+      else if (status === 'Denied') return "red";
       else return "default";
     },
     reloadPage() {

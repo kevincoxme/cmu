@@ -12,7 +12,7 @@
           >
             <template v-slot:top>
               <v-toolbar flat>
-                <v-toolbar-title>{{table_title}}</v-toolbar-title>
+                <v-toolbar-title>{{formattedTitle}}: {{data.length}}</v-toolbar-title>
                 <v-divider class="mx-4" inset vertical></v-divider>
                 <v-spacer></v-spacer>
               </v-toolbar>
@@ -21,7 +21,7 @@
         </v-card>
       </v-col>
       <v-col cols="12">
-        <v-card v-show="report == 'request_reports'">
+        <!-- <v-card v-show="report == 'request_reports'">
           <v-data-table
             :headers="fileRequestReportsTableHeader"
             :items="filerequestreports"
@@ -37,7 +37,7 @@
               </v-toolbar>
             </template>
           </v-data-table>
-        </v-card>
+        </v-card> -->
       </v-col>
     </v-row>
   </v-container>
@@ -82,66 +82,82 @@ export default {
       usertype: ["Chief", "Staff"],
     };
   },
-
+    computed: {
+        formattedTitle()
+        {
+            switch (this.report){
+                case 'request_reports':
+                    return 'Total No. Of Requested Records';
+                break;
+                case 'upload_reports':
+                    return `${this.period} Document Reports`;
+                break;
+            }
+        }
+    },
   created() {
       if(this.report === 'request_reports') {
-          this.table_title = 'Total No. Of Requested Records'
           this.headers.push({
-          text: "Date",
+          text: "User ID",
           align: "start",
           sortable: true,
-          value: "date",
+          value: "date_uploaded",
           class: "info text-black",
         },
         {
-          text: "Total no. of Requests",
-          value: "total",
+          text: "File name",
+            value: "filename",
           class: "info text-black",
         },
         {
-          text: "Pending",
-          value: "pending",
+          text: "Category",
+            value: "category",
           class: "info text-black",
         },
         {
-          text: "Approved",
-          value: "approved",
+          text: "Purpose",
+            value: "purpose",
           class: "info text-black",
         },
         {
-          text: "Denied",
-          value: "denied",
+          text: "Attached File",
+            value: "file_location",
           class: "info text-black",
         },
         {
-          text: "Expired",
-          value: "expired",
+          text: "Req. Date",
+            value: "request_date",
           class: "info text-black",
         })
       }else {
-           this.table_title = 'Upload Document Reports'
            this.headers.push({
-          text: "Date",
+          text: "Date Uploaded",
           align: "start",
           sortable: true,
-          value: "date",
+          value: "date_uploaded",
           class: "info text-black",
         },
          {
-          text: "Total Uploaded",
-          value: "total_uploaded",
+          text: "Ref code",
+          value: "code",
           class: "info text-black",
         },
         {
-          text: "Total Archived",
-          value: "total_archive",
+          text: "File name",
+          value: "filename",
           class: "info text-black",
         },
         {
-          text: "Total Disposed",
-          value: "total_dispose",
+          text: "Category",
+          value: "category",
           class: "info text-black",
-        },)
+        },
+        {
+          text: "Retention date",
+          value: "retention_date",
+          class: "info text-black",
+        },
+        )
       }
   }
 };

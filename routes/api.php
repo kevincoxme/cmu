@@ -30,6 +30,7 @@ Route::get('/requestreportsdaily', [RequestController::class, 'requestReportsDai
 Route::get('/requestreportsweekly', [RequestController::class, 'requestReportsWeekly']);
 Route::get('/requestreportsmonthly', [RequestController::class, 'requestReportsMonthly']);
 Route::get('/requestreportsyearly', [RequestController::class, 'requestReportsYearly']);
+Route::post('/upload-reports', [RequestController::class, 'uploadReports']);
 
 Route::get('/filerequestreports',[RequestController::class,'fileRequestReports']);
 

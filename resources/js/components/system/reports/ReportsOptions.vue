@@ -81,7 +81,7 @@ export default {
     return {
       items: ["Daily", "Monthly", "Yearly"],
       period: "Daily",
-      
+
       uploadperioditems: ["Monthly", "Yearly"],
       uploadperiod: "Monthly",
 
