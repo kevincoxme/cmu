@@ -89,9 +89,6 @@
                             dense
                             class="mb-2"
                         />
-                        <v-btn value="left" color="info" small @click="printRequestReport">
-                            <v-icon class="text-white"> mdi-printer </v-icon>
-                        </v-btn>
                     </v-col>
                 </v-row>
                 <!-- <h5>APPROVED UPLOAD DOCUMENTS: {{ totalUploadDocuments }}</h5> -->
